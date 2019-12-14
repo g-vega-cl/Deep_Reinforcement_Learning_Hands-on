@@ -1,0 +1,141 @@
+.book {
+	DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.calibre {
+	FONT-SIZE: 1em; TEXT-ALIGN: left; PADDING-LEFT: 0px; MARGIN: 0px 5pt; DISPLAY: block; PADDING-RIGHT: 0px; TEXT-INDENT: 0px
+}
+.calibre1 {
+	LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre2 {
+	FONT-WEIGHT: bold; LINE-HEIGHT: 1.2
+}
+.calibre3 {
+	HEIGHT: 2px; WIDTH: 100%; COLOR: gray; PADDING-BOTTOM: 0px; PADDING-TOP: 0px; PADDING-LEFT: 0px; MARGIN: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; PADDING-RIGHT: 0px
+}
+.calibre4 {
+	FONT-SIZE: 2em; FONT-WEIGHT: bold; MARGIN: 0px 0px 1em; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre5 {
+	MARGIN-LEFT: 0.5em; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 10pt
+}
+.calibre6 {
+	MARGIN-LEFT: 1em; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 20pt
+}
+.calibre7 {
+	MARGIN-LEFT: 1.5em; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 30pt
+}
+.calibre8 {
+	MARGIN: 1em 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre9 {
+	MARGIN-BOTTOM: 10px; HEIGHT: auto; WIDTH: auto; PADDING-BOTTOM: 10px; LINE-HEIGHT: 1.2
+}
+.calibre10 {
+	HEIGHT: 1em; CLEAR: both; MARGIN: 1em 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre11 {
+	FONT-STYLE: italic; LINE-HEIGHT: 1.2
+}
+.calibre12 {
+	DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.calibre13 {
+	HEIGHT: 10px; WIDTH: 1px; DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.calibre14 {
+	FONT-STYLE: italic; TEXT-ALIGN: center; MARGIN: 1em 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre15 {
+	MARGIN-BOTTOM: 10px; MARGIN-TOP: 0px; BORDER-COLLAPSE: separate; BORDER-SPACING: 2px; DISPLAY: table; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre16 {
+	DISPLAY: table-column-group; LINE-HEIGHT: 1.2
+}
+.calibre17 {
+	DISPLAY: table-column; LINE-HEIGHT: 1.2
+}
+.calibre18 {
+	VERTICAL-ALIGN: middle; DISPLAY: table-row-group; LINE-HEIGHT: 1.2
+}
+.calibre19 {
+	VERTICAL-ALIGN: inherit; DISPLAY: table-row; LINE-HEIGHT: 1.2
+}
+.calibre20 {
+	FONT-SIZE: 0.75em; VERTICAL-ALIGN: top; PADDING-BOTTOM: 1px; TEXT-ALIGN: left; PADDING-TOP: 1px; PADDING-LEFT: 1px; DISPLAY: table-cell; PADDING-RIGHT: 1px; TEXT-INDENT: 0px
+}
+.calibre21 {
+	FONT-SIZE: 0.75em; VERTICAL-ALIGN: bottom; PADDING-BOTTOM: 1px; TEXT-ALIGN: left; PADDING-TOP: 1px; PADDING-LEFT: 1px; DISPLAY: table-cell; PADDING-RIGHT: 1px; TEXT-INDENT: 0px
+}
+.calibre22 {
+	MARGIN: 1em 0px 10px; DISPLAY: block; TEXT-INDENT: 0px
+}
+.calibre23 {
+	FONT-WEIGHT: bold
+}
+.calibre24 {
+	HEIGHT: auto; WIDTH: auto; LINE-HEIGHT: 1.2
+}
+.calibre25 {
+	FONT-SIZE: 1em; VERTICAL-ALIGN: sub; LINE-HEIGHT: normal
+}
+.calibre26 {
+	HEIGHT: 1em; CLEAR: both; MARGIN: 1em 0px 0px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre27 {
+	FONT-SIZE: 1em; VERTICAL-ALIGN: super; LINE-HEIGHT: normal
+}
+.calibre28 {
+	MARGIN: 1em 0px 0px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.calibre29 {
+	FONT-STYLE: italic
+}
+.calibre30 {
+	FONT-SIZE: 1.66em; FONT-WEIGHT: bold; MARGIN: 0px 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.caption {
+	FONT-STYLE: italic; TEXT-ALIGN: center; DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.informalexample {
+	BORDER-TOP: black 0px solid; BORDER-RIGHT: black 0px solid; MARGIN-TOP: 0px; BORDER-BOTTOM: black 0px solid; MARGIN-LEFT: 0px; BORDER-LEFT: black 0px solid; DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.itemizedlist {
+	LIST-STYLE-TYPE: disc; MARGIN-BOTTOM: 5px; MARGIN-TOP: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; MARGIN-RIGHT: 0px
+}
+.itemizedlist1 {
+	LIST-STYLE-TYPE: circle; MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; MARGIN-RIGHT: 0px
+}
+.itemizedlist2 {
+	LIST-STYLE-TYPE: square; MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; MARGIN-RIGHT: 0px
+}
+.listitem {
+	MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px; DISPLAY: list-item; LINE-HEIGHT: 1.2
+}
+.literal {
+	FONT-FAMILY: monospace; LINE-HEIGHT: 1.2
+}
+.mediaobject {
+	MARGIN-BOTTOM: 10px; FONT-STYLE: italic; DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.orderedlist {
+	LIST-STYLE-TYPE: decimal; MARGIN-BOTTOM: 5px; MARGIN-TOP: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; MARGIN-RIGHT: 0px
+}
+.orderedlist1 {
+	LIST-STYLE-TYPE: decimal; MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px; DISPLAY: block; LINE-HEIGHT: 1.2; MARGIN-RIGHT: 0px
+}
+.programlisting {
+	WORD-WRAP: break-word; FONT-FAMILY: monospace; WHITE-SPACE: pre-wrap; MARGIN: 1em 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2
+}
+.strong {
+	LINE-HEIGHT: 1.2
+}
+.title {
+	FONT-SIZE: 2em; FONT-WEIGHT: bold; MARGIN: 0px 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.title1 {
+	FONT-SIZE: 1.66em; FONT-WEIGHT: bold; MARGIN: 0px 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
+.title2 {
+	FONT-SIZE: 1.12em; FONT-WEIGHT: bold; MARGIN: 0px 0px 10px; DISPLAY: block; LINE-HEIGHT: 1.2; TEXT-INDENT: 0px
+}
