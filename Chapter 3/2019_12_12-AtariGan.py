@@ -34,9 +34,9 @@ IMAGE_SIZE = 64
 class InputWrapper(gym.ObservationWrapper):
 	def __init__(self, *args):
 		super(InputWrapper, self).__init__(*args)
-		assert isinstance(self.observarion_space, gym.spaces.Box) #gym.spaces.box is a type of space
+		assert isinstance(self.observation_space, gym.spaces.Box) #gym.spaces.box is a type of space
 		old_space = self.observation_space #Observation space comes with the gym environment
-		self.observarion_space = gym.spaces.Box(self.observation(old_space.low),
+		self.observation_space = gym.spaces.Box(self.observation(old_space.low),
 			self.observation(old_space.high), dtype = np.float32)
 
 	def observation(self, observation):
@@ -56,7 +56,7 @@ the probability that Discriminator thinks our input image is from the real datas
 """
 
 
-
+DISCR_FILTERS = 64
 class Discriminator(nn.Module):
     def __init__(self, input_shape):
         super(Discriminator, self).__init__()
@@ -94,7 +94,8 @@ converts this vector into a color image of the original resolution.
 
 I think that means that it literally generates images from random numbers
 """
-
+GENER_FILTERS = 64
+LATENT_VECTOR_SIZE = 100
 class Generator(nn.Module):
     def __init__(self, output_shape):
         super(Generator, self).__init__()
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 	parser.add_argument("--cuda", default = False, action = "store_true")
 	args = parser.parse_args()
 	device = torch.device("cuda" if args.cuda else "cpu")
-	env_names = ('Breakcout-v0', 'AirRaid-v0', 'Pong-v0')
+	env_names = ('Breakout-v0', 'AirRaid-v0', 'Pong-v0')
 	envs = [InputWrapper(gym.make(name)) for name in env_names]
 	input_shape = envs[0].observation_space.shape
 	#we process command-line arguments (--cuda).
@@ -203,7 +204,25 @@ if __name__ == "__main__":
 		#what does the objective function does? I think we are summing the 
 			#losses of how accurate were the true and false labels.
 		dis_loss = objective(dis_output_true_v,true_lavels_v) + objective(dis_output_fake_v, fake_labels_v)
-		diss_loss.backward()
+		dis_loss.backward()
 		dis_optimizer.step()
 		dis_losses.append(dis_loss.item())
 
+		#Train generator
+		gen_optimizer.zero_grad()
+		dis_output_v = net_discr(gen_output_v)
+		gen_loss_v = objective(dis_output_v, true_labels_v)
+		gen_loss_v.backward
+		gen_optimizer.step()
+		gen_losses.append(gen_loss_v.item())
+
+		iter_no += 1
+		REPORT_EVERY_ITER = 100
+		SAVE_IMAGE_EVERY_ITER = 1000
+		if iter_no % REPORT_EVERY_ITER == 0:
+			log.info("iter %d: gen_loss=%.3e, dis_loss=%.3e", iter_no, np.mean(gen_losses),np.mean(dis_losses),iter_no)
+			gen_losses = []
+			dis_losses = []
+		if iter_no % SAVE_IMAGE_EVERY_ITER == 0:
+			writer.add_image("fake", vutils.make_grid(gen_output_v.data[:64]), iter_no)
+			writer.add_image("real", vutils.make_grid(batch_v.data[:64]), iter_no) 
