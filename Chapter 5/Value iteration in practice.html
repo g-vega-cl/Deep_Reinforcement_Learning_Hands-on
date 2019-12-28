@@ -1,0 +1,274 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META content="IE=5.0000" 
+http-equiv="X-UA-Compatible">
+<TITLE>Value iteration in practice</TITLE>
+<META name=GENERATOR content="MSHTML 11.00.10570.1001">
+<META content="text/html; charset=utf-8" http-equiv=Content-Type><LINK 
+rel=stylesheet type=text/css 
+href="Value%20iteration%20in%20practice_files/stylesheet.css"><LINK 
+rel=stylesheet type=text/css 
+href="Value%20iteration%20in%20practice_files/page_styles.css"></HEAD>
+<BODY id=page class=calibre>
+<DIV title="Value iteration in practice" class=book>
+<DIV id=164MG2-ce551566b6304db290b61e4d70de52ee class=book>
+<DIV class=book>
+<DIV class=book>
+<H1 id=calibre_pb_0 class=title><A id=ch05lvl1sec38 class=calibre1></A>Value 
+iteration in practice</H1></DIV></DIV></DIV>
+<P class=calibre8>The<A id=id167 class=calibre1></A> complete example is in 
+<CODE class=literal>Chapter05/01_frozenlake_v_learning.py</CODE>. The central 
+data structures in<A id=id168 class=calibre1></A> this example are as 
+follows:</P>
+<DIV class=book>
+<UL class=itemizedlist>
+  <LI class=listitem><SPAN class=strong><STRONG class=calibre2>Reward 
+  table</STRONG></SPAN>: A <A id=id169 class=calibre1></A>dictionary with the 
+  composite key "source state" + "action" + "target state". The value is 
+  obtained from the immediate reward.
+  <LI class=listitem><SPAN class=strong><STRONG class=calibre2>Transitions 
+  table</STRONG></SPAN>: A<A id=id170 class=calibre1></A> dictionary keeping 
+  counters of the experienced transitions. The key is the composite "state" + 
+  "action" and the value is another dictionary that maps the target state into a 
+  count of times that we've seen it. For example, if in state 0 we execute 
+  action 1 ten times, after three times it leads us to state 4 and after seven 
+  times to state 5. Entry with the key (0, 1) in this table will be a dict <CODE 
+  class=literal>{4: 3, 5: 7}</CODE>. We use this table to estimate the 
+  probabilities of our transitions.
+  <LI class=listitem><SPAN class=strong><STRONG class=calibre2>Value 
+  table</STRONG></SPAN>: A <A id=id171 class=calibre1></A>dictionary that maps a 
+  state into the calculated value of this&nbsp;state.</LI></UL></DIV>
+<P class=calibre8>The overall logic of our code is simple: in the loop, we play 
+100 random steps from the environment, populating the reward and transition 
+tables. After those 100 steps, we perform a value iteration loop over all 
+states, updating our value table. Then we play several full episodes to check 
+our improvements using the updated value table. If the average reward for those 
+test episodes is above the 0.8 boundary, then we stop training. During test 
+episodes, we also update our reward and transition tables to use all data from 
+the environment.</P>
+<P class=calibre8>Okay, so let's come to the code. In the beginning, we import 
+used packages and define constants:</P>
+<DIV class=informalexample><PRE class=programlisting>import gym
+import collections
+from tensorboardX import SummaryWriter
+
+ENV_NAME = "FrozenLake-v0"
+GAMMA = 0.9
+TEST_EPISODES = 20</PRE></DIV>
+<P class=calibre8>Then we<A id=id172 class=calibre1></A> define the <CODE 
+class=literal>Agent</CODE> class, which will keep our tables and contain 
+functions we'll be using in the training loop:</P>
+<DIV class=informalexample><PRE class=programlisting>class Agent:
+    def __init__(self):
+        self.env = gym.make(ENV_NAME)
+        self.state = self.env.reset()
+        self.rewards = collections.defaultdict(float)
+        self.transits = collections.defaultdict(collections.Counter)
+        self.values = collections.defaultdict(float)</PRE></DIV>
+<P class=calibre8>In the <CODE class=literal>class</CODE> constructor, we create 
+the environment we'll be using for data samples, obtain our first observation, 
+and define tables for rewards, transitions, and values.</P>
+<DIV class=informalexample><PRE class=programlisting>    def play_n_random_steps(self, count):
+        for _ in range(count):
+            action = self.env.action_space.sample()
+            new_state, reward, is_done, _ = self.env.step(action)
+            self.rewards[(self.state, action, new_state)] = reward
+            self.transits[(self.state, action)][new_state] += 1
+            self.state = self.env.reset() if is_done else new_state</PRE></DIV>
+<P class=calibre8>This function is used to gather random experience from the 
+environment and update reward and transition tables. Note that we don't need to 
+wait for the end of the episode to start learning; we just perform N steps and 
+remember their outcomes. This is one of the differences between Value iteration 
+and Cross-entropy, which can&nbsp;learn only on full episodes.</P>
+<P class=calibre8>The next function calculates the value of the action from the 
+state, using our transition, reward and values tables. We will use it for two 
+purposes: to select the best action to perform from the state and to calculate 
+the new value of the state on value iteration. Its logic is illustrated in the 
+following diagram and we do the following:</P>
+<DIV class=book>
+<OL class=orderedlist>
+  <LI class=listitem value=1>We extract transition counters for the given state 
+  and action from the transition table. Counters in this table have a form of 
+  dict, with target states as key and a count of experienced transitions as 
+  value. We sum all counters to obtain the total count of times we've executed 
+  the action from the state. We will use this total value later to go from an 
+  individual counter to probability.
+  <LI class=listitem value=2>Then we iterate every target state that our action 
+  has landed on and calculate its contribution into the total action value using 
+  the Bellman equation. This contribution equals to immediate reward plus 
+  discounted value for the target state. We multiply this sum to the probability 
+  of this transition and add the result to the final action value.</LI></OL>
+<DIV class=calibre13></DIV></DIV>
+<DIV class=mediaobject><IMG class=calibre9 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00114.jpeg">
+<DIV class=caption>
+<P class=calibre14>Figure 8: The calculation of the state's 
+value</P></DIV></DIV>
+<P class=calibre10></P>
+<P class=calibre8>In our<A id=id173 class=calibre1></A> diagram, we have an 
+illustration of a calculation of value for state <SPAN class=strong><EM 
+class=calibre11>s</EM></SPAN> and action <SPAN class=strong><EM 
+class=calibre11>a</EM></SPAN>. Imagine that during our experience, we have 
+executed this action several times (<SPAN class=strong><IMG class=calibre24 
+alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00115.jpeg"></SPAN>) and it ends up 
+in one of two states, <SPAN class=strong><IMG class=calibre24 
+alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00099.jpeg"></SPAN> or <SPAN 
+class=strong><IMG class=calibre24 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00100.jpeg"></SPAN>. How many times 
+we have switched to each of these states is stored in our transition table as 
+dict {<SPAN class=strong><IMG class=calibre24 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00099.jpeg"></SPAN>:<SPAN 
+class=strong><IMG class=calibre24 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00116.jpeg"></SPAN>, <SPAN 
+class=strong><IMG class=calibre24 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00100.jpeg"></SPAN>: <SPAN 
+class=strong><IMG class=calibre24 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00115.jpeg"></SPAN>}. Then, the 
+approximate value for the state and action <SPAN class=strong><EM 
+class=calibre11>Q(s, a)</EM></SPAN> will be equal to the probability of every 
+state, multiplied to the value of the state. From the Bellman equation, this 
+equals to the sum of the immediate reward and the discounted long-term state 
+value.</P>
+<DIV class=informalexample><PRE class=programlisting>    def calc_action_value(self, state, action):
+        target_counts = self.transits[(state, action)]
+        total = sum(target_counts.values())
+        action_value = 0.0
+        for tgt_state, count in target_counts.items():
+            reward = self.rewards[(state, action, tgt_state)]
+            action_value += (count / total) * (reward + GAMMA * self.values[tgt_state])
+        return action_value</PRE></DIV>
+<P class=calibre8>The next function uses the function we just described to make 
+a decision about the best action to take from the given state. It iterates over 
+all possible actions in the environment and calculates value for every action. 
+The action with the largest value wins and is returned as the action to take. 
+This action selection process is deterministic, as the <CODE 
+class=literal>play_n_random_steps()</CODE> function introduces enough 
+exploration. So, our agent will behave greedily in regard to our value 
+approximation.</P>
+<DIV class=informalexample><PRE class=programlisting>    def select_action(self, state):
+        best_action, best_value = None, None
+        for action in range(self.env.action_space.n):
+            action_value = self.calc_action_value(state, action)
+            if best_value is None or best_value &lt; action_value:
+                best_value = action_value
+                best_action = action
+        return best_action</PRE></DIV>
+<P class=calibre8>The <CODE class=literal>play_episode</CODE> function uses 
+<CODE class=literal>select_action</CODE> to find the best action to take and 
+plays one full episode using the provided environment. This function is used to 
+play test episodes, during <A id=id174 class=calibre1></A>which we don't want to 
+mess up with the current state of the main environment used to gather random 
+data. So, we're using the second environment passed as an argument. The logic is 
+very simple and should be already familiar to you: we just loop over states 
+accumulating reward for one episode:</P>
+<DIV class=informalexample><PRE class=programlisting>    def play_episode(self, env):
+        total_reward = 0.0
+        state = env.reset()
+        while True:
+            action = self.select_action(state)
+            new_state, reward, is_done, _ = env.step(action)
+            self.rewards[(state, action, new_state)] = reward
+            self.transits[(state, action)][new_state] += 1
+            total_reward += reward
+            if is_done:
+                break
+            state = new_state
+        return total_reward</PRE></DIV>
+<P class=calibre8>The final method of the <CODE class=literal>Agent</CODE> class 
+is our value iteration implementation and it is surprisingly simple, thanks to 
+the preceding functions. What we do is just loop over all states in the 
+environment, then for every state we calculate the values for the states 
+reachable from it, obtaining candidates for the value of the state. Then we 
+update the value of our current state with the maximum value of the action 
+available from the state:</P>
+<DIV class=informalexample><PRE class=programlisting>    def value_iteration(self):
+        for state in range(self.env.observation_space.n):
+            state_values = [self.calc_action_value(state, action)
+                            for action in range(self.env.action_space.n)]
+            self.values[state] = max(state_values)</PRE></DIV>
+<P class=calibre8>That's all our agent's methods, and the final piece is a 
+training loop and the monitoring of the code:</P>
+<DIV class=informalexample><PRE class=programlisting>if __name__ == "__main__":
+    test_env = gym.make(ENV_NAME)
+    agent = Agent()
+    writer = SummaryWriter(comment="-v-learning")</PRE></DIV>
+<P class=calibre8>We create the environment we'll be using for testing, the 
+<CODE class=literal>Agent</CODE> class instance and the summary writer for 
+TensorBoard:</P>
+<DIV class=informalexample><PRE class=programlisting>    iter_no = 0
+    best_reward = 0.0
+    while True:
+        iter_no += 1
+        agent.play_n_random_steps(100)
+        agent.value_iteration()</PRE></DIV>
+<P class=calibre8>The two lines <A id=id175 class=calibre1></A>in the preceding 
+code snippet are the key piece in the training loop. First, we perform 100 
+random steps to fill our reward and transition tables with fresh data and then 
+we run value iteration over all states. The rest of the code plays test episodes 
+using the value table as our policy, then writes data into TensorBoard, tracks 
+the best average reward, and checks for the training loop stop condition.</P>
+<DIV class=informalexample><PRE class=programlisting>        reward = 0.0
+        for _ in range(TEST_EPISODES):
+            reward += agent.play_episode(test_env)
+        reward /= TEST_EPISODES
+        writer.add_scalar("reward", reward, iter_no)
+        if reward &gt; best_reward:
+            print("Best reward updated %.3f -&gt; %.3f" % (best_reward, reward))
+            best_reward = reward
+        if reward &gt; 0.80:
+            print("Solved in %d iterations!" % iter_no)
+            break
+    writer.close()</PRE></DIV>
+<P class=calibre8>Okay, let's run our program:</P>
+<DIV class=informalexample><PRE class=programlisting>rl_book_samples/Chapter05$ ./01_frozenlake_v_learning.py
+[2017-10-13 11:39:37,778] Making new env: FrozenLake-v0
+[2017-10-13 11:39:37,988] Making new env: FrozenLake-v0
+Best reward updated 0.000 -&gt; 0.150
+Best reward updated 0.150 -&gt; 0.500
+Best reward updated 0.500 -&gt; 0.550
+Best reward updated 0.550 -&gt; 0.650
+Best reward updated 0.650 -&gt; 0.800
+Best reward updated 0.800 -&gt; 0.850
+Solved in 36 iterations!</PRE></DIV>
+<P class=calibre8>Our <A id=id176 class=calibre1></A>solution is stochastic, and 
+my experiments usually required from 12 to 100 iterations to reach a solution, 
+but in all cases, it took less than a second to find a good policy that could 
+solve the environment in 80% of runs. If you remember how many hours were 
+required to achieve a 60% success ratio using Cross-entropy, then you can 
+understand that this is a major improvement. There are several reasons for 
+that.</P>
+<P class=calibre8>First of all, the stochastic outcome of our actions, plus the 
+length of the episodes (6-10&nbsp;steps on average), makes it hard for the 
+Cross-entropy method to understand what was done right in the episode and which 
+step was a mistake. The value iteration works with individual values of state 
+(or action) and incorporates the probabilistic outcome of actions naturally, by 
+estimating probability and calculating the expected value. So, it's much simpler 
+for the<A id=id177 class=calibre1></A> value iteration and requires much less 
+data from the environment (which is called <SPAN class=strong><STRONG 
+class=calibre2>sample efficiency</STRONG></SPAN> in RL).</P>
+<P class=calibre8>The second reason is the fact that the value iteration doesn't 
+need full episodes to start learning. In an extreme case, we can start updating 
+our values just from the single example. However, for FrozenLake, due to the 
+reward structure (we get 1 only after successfully reaching the target state), 
+we still need to have at least one successful episode to start learning from a 
+useful value table, which may be challenging to achieve in more complex 
+environments. For example, you can try switching existing code to a larger 
+version of FrozenLake, which has the name <SPAN class=strong><STRONG 
+class=calibre2>FrozenLake8x8-v0</STRONG></SPAN>. The larger version of 
+FrozenLake can take from 50 to 400 iterations to solve, and, according to 
+TensorBoard charts, most of the time it waits for&nbsp;the first successful 
+episode, then very quickly reaches convergence. The following is a chart with 
+two lines. Orange corresponds to the reward during the training of&nbsp;<SPAN 
+class=strong><STRONG class=calibre2>FrozenLake-v0 (4x4)</STRONG></SPAN> and blue 
+is the reward of <SPAN class=strong><STRONG 
+class=calibre2>FrozenLake8x8-v0</STRONG></SPAN>.:</P>
+<DIV class=mediaobject><IMG class=calibre9 alt="Value iteration in practice" 
+src="Value%20iteration%20in%20practice_files/00117.jpeg">
+<DIV class=caption>
+<P class=calibre14>Figure 9: The convergence of FrozenLake 4x4 and 
+8x8</P></DIV></DIV>
+<P class=calibre10></P>
+<P class=calibre8>Now it's time to compare the code that learns the values of 
+states, as we just discussed, to the code that learns the values of 
+actions.</P></DIV></BODY></HTML>
